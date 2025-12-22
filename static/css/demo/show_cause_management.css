@@ -1,0 +1,876 @@
+.sc-dev-banner {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    border-left: 5px solid #ffc107;
+    border-radius: 6px;
+    padding: 10px 16px;
+    margin: 0 0 18px 0;
+    font-size: 13px;
+    color: #664d03;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sc-dev-banner code {
+    background: rgba(0,0,0,0.07);
+    border-radius: 3px;
+    padding: 1px 5px;
+    font-family: monospace;
+}
+
+/* ── Page container ─────────────────────────────────────────────────────── */
+
+.sc-mgmt-container {
+    padding: 0 4px;
+}
+
+/* ── Page header ────────────────────────────────────────────────────────── */
+
+.sc-page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 22px;
+}
+
+.sc-page-title h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin: 0 0 4px 0;
+}
+
+.sc-page-title h2 i {
+    color: #c62828;
+    margin-right: 8px;
+}
+
+.sc-page-subtitle {
+    font-size: 13px;
+    color: #777;
+    margin: 0;
+    max-width: 600px;
+}
+
+/* ── Summary cards ──────────────────────────────────────────────────────── */
+
+.sc-summary-row {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 14px;
+    margin-bottom: 22px;
+}
+
+@media (max-width: 1200px) {
+    .sc-summary-row { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 700px) {
+    .sc-summary-row { grid-template-columns: repeat(2, 1fr); }
+}
+
+.sc-stat-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border: 1px solid #eee;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.sc-stat-card.clickable {
+    cursor: pointer;
+}
+
+.sc-stat-card.clickable:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.10);
+}
+
+.sc-stat-card.active-filter {
+    border-color: #1565c0;
+    box-shadow: 0 0 0 2px rgba(21,101,192,0.25);
+}
+
+.sc-stat-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.sc-icon-issued   { background: #e3f2fd; color: #1565c0; }
+.sc-icon-r1       { background: #fff3e0; color: #e65100; }
+.sc-icon-r2       { background: #fce4ec; color: #c62828; }
+.sc-icon-overdue  { background: #fff8e1; color: #f57f17; }
+.sc-icon-expired  { background: #f3e5f5; color: #6a1b9a; }
+.sc-icon-closed   { background: #e8f5e9; color: #2e7d32; }
+
+.sc-stat-value {
+    font-size: 26px;
+    font-weight: 700;
+    color: #1a1a2e;
+    line-height: 1;
+}
+
+.sc-stat-label {
+    font-size: 12px;
+    color: #888;
+    margin-top: 3px;
+}
+
+/* ── Filter bar ─────────────────────────────────────────────────────────── */
+
+.sc-filter-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.sc-filter-tabs {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.sc-tab {
+    padding: 7px 16px;
+    border-radius: 20px;
+    border: 1px solid #ddd;
+    background: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    color: #555;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.sc-tab:hover {
+    background: #f5f5f5;
+    border-color: #bbb;
+}
+
+.sc-tab.active {
+    background: #1565c0;
+    color: #fff;
+    border-color: #1565c0;
+}
+
+.sc-filter-search {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.sc-search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #aaa;
+    font-size: 13px;
+}
+
+.sc-search-box {
+    padding: 8px 14px 8px 34px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    font-size: 13px;
+    width: 260px;
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+.sc-search-box:focus {
+    border-color: #1565c0;
+    box-shadow: 0 0 0 2px rgba(21,101,192,0.15);
+}
+
+/* ── Table ──────────────────────────────────────────────────────────────── */
+
+.sc-table-wrapper {
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #eee;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    overflow-x: auto;
+}
+
+.sc-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.sc-table th {
+    background: #f8f9fc;
+    padding: 11px 14px;
+    text-align: left;
+    font-weight: 600;
+    color: #555;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    border-bottom: 1px solid #eee;
+    white-space: nowrap;
+}
+
+.sc-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #f5f5f5;
+    vertical-align: middle;
+    color: #333;
+}
+
+.sc-table tr:last-child td {
+    border-bottom: none;
+}
+
+.sc-table tr:hover td {
+    background: #fafbff;
+}
+
+.sc-loading-row td,
+.sc-empty-row td {
+    text-align: center;
+    padding: 40px 14px;
+    color: #aaa;
+    font-size: 14px;
+}
+
+/* Hospital cell */
+.sc-hospital-name {
+    font-weight: 600;
+    color: #1a1a2e;
+}
+.sc-hospital-id {
+    font-size: 11px;
+    color: #999;
+    margin-top: 2px;
+}
+
+/* Status badge */
+.sc-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.sc-badge-ISSUED          { background: #e3f2fd; color: #1565c0; }
+.sc-badge-REMINDER_1_SENT { background: #fff3e0; color: #e65100; }
+.sc-badge-REMINDER_2_SENT { background: #fce4ec; color: #c62828; }
+.sc-badge-EXPIRED         { background: #f3e5f5; color: #6a1b9a; }
+.sc-badge-CLOSED          { background: #e8f5e9; color: #2e7d32; }
+
+/* Deadline indicator */
+.sc-deadline {
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.sc-deadline-future  { color: #388e3c; }
+.sc-deadline-soon    { color: #f57c00; font-weight: 600; }
+.sc-deadline-overdue { color: #c62828; font-weight: 700; }
+.sc-deadline-done    { color: #999;    font-style: italic; }
+.sc-deadline-na      { color: #ccc; }
+
+/* Action buttons */
+.sc-action-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.sc-action-btn {
+    padding: 5px 11px;
+    border: none;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, opacity 0.15s;
+    white-space: nowrap;
+}
+
+.sc-action-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.sc-btn-r1      { background: #e3f2fd; color: #1565c0; }
+.sc-btn-r1:hover:not(:disabled) { background: #bbdefb; }
+
+.sc-btn-r2      { background: #fce4ec; color: #c62828; }
+.sc-btn-r2:hover:not(:disabled) { background: #f8bbd0; }
+
+.sc-btn-expire  { background: #f3e5f5; color: #6a1b9a; }
+.sc-btn-expire:hover:not(:disabled) { background: #e1bee7; }
+
+.sc-btn-close-notice { background: #e8f5e9; color: #2e7d32; }
+.sc-btn-close-notice:hover:not(:disabled) { background: #c8e6c9; }
+
+.sc-btn-history { background: #f5f5f5; color: #555; }
+.sc-btn-history:hover { background: #e0e0e0; }
+
+/* ── Pagination ─────────────────────────────────────────────────────────── */
+
+.sc-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0 0 0;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.sc-page-info {
+    font-size: 13px;
+    color: #888;
+}
+
+.sc-page-controls {
+    display: flex;
+    gap: 5px;
+}
+
+.sc-page-btn {
+    padding: 6px 13px;
+    border: 1px solid #ddd;
+    background: #fff;
+    border-radius: 5px;
+    font-size: 13px;
+    cursor: pointer;
+    color: #555;
+    transition: all 0.15s;
+}
+
+.sc-page-btn:hover:not(:disabled) {
+    background: #f0f0f0;
+}
+
+.sc-page-btn.active {
+    background: #1565c0;
+    color: #fff;
+    border-color: #1565c0;
+}
+
+.sc-page-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* ── Modals ─────────────────────────────────────────────────────────────── */
+
+.sc-modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 3000;
+}
+
+.sc-modal-backdrop.open { display: block; }
+
+.sc-modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 3001;
+    background: #fff;
+    width: 620px;
+    max-width: calc(100vw - 40px);
+    max-height: calc(100vh - 80px);
+    border-radius: 10px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.sc-modal.open {
+    display: flex;
+}
+
+.sc-modal-sm {
+    width: 480px;
+}
+
+.sc-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 18px 22px 14px;
+    border-bottom: 1px solid #eee;
+    background: #f8f9fc;
+    flex-shrink: 0;
+}
+
+.sc-modal-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a1a2e;
+    flex: 1;
+}
+
+.sc-modal-subtitle {
+    font-size: 12px;
+    color: #888;
+}
+
+.sc-modal-close {
+    background: none;
+    border: none;
+    font-size: 17px;
+    color: #aaa;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.sc-modal-close:hover { background: #eee; color: #333; }
+
+.sc-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 22px;
+}
+
+.sc-modal-desc {
+    font-size: 14px;
+    color: #555;
+    margin: 0 0 16px 0;
+}
+
+.sc-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 14px 22px;
+    border-top: 1px solid #eee;
+    background: #fafafa;
+    flex-shrink: 0;
+}
+
+/* ── Close notice form ──────────────────────────────────────────────────── */
+
+.sc-form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 8px;
+}
+
+.sc-optional {
+    font-weight: 400;
+    color: #999;
+}
+
+.sc-textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 13px;
+    resize: vertical;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.15s;
+}
+
+.sc-textarea:focus {
+    border-color: #1565c0;
+    box-shadow: 0 0 0 2px rgba(21,101,192,0.12);
+}
+
+/* ── Modal buttons ──────────────────────────────────────────────────────── */
+
+.sc-btn {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.sc-btn-cancel  { background: #f0f0f0; color: #555; }
+.sc-btn-cancel:hover { background: #e0e0e0; }
+
+.sc-btn-confirm { background: #2e7d32; color: #fff; }
+.sc-btn-confirm:hover { background: #1b5e20; }
+
+/* ── Audit log timeline ─────────────────────────────────────────────────── */
+
+.sc-timeline {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    position: relative;
+}
+
+.sc-timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e0e0e0;
+}
+
+.sc-timeline-item {
+    display: flex;
+    gap: 14px;
+    padding: 0 0 22px 0;
+    position: relative;
+}
+
+.sc-timeline-dot {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #e3f2fd;
+    color: #1565c0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.sc-timeline-dot.action-ISSUED          { background: #e3f2fd; color: #1565c0; }
+.sc-timeline-dot.action-REMINDER_1_SENT { background: #fff3e0; color: #e65100; }
+.sc-timeline-dot.action-REMINDER_2_SENT { background: #fce4ec; color: #c62828; }
+.sc-timeline-dot.action-CLOSED         { background: #e8f5e9; color: #2e7d32; }
+.sc-timeline-dot.action-EXPIRED        { background: #f3e5f5; color: #6a1b9a; }
+.sc-timeline-dot.action-EMAIL_FAILED   { background: #fbe9e7; color: #bf360c; }
+
+.sc-timeline-content {
+    padding-top: 4px;
+}
+
+.sc-timeline-action {
+    font-weight: 600;
+    font-size: 13px;
+    color: #1a1a2e;
+}
+
+.sc-timeline-meta {
+    font-size: 12px;
+    color: #888;
+    margin-top: 2px;
+}
+
+.sc-timeline-notes {
+    font-size: 12px;
+    color: #555;
+    margin-top: 5px;
+    font-style: italic;
+    background: #f9f9f9;
+    border-left: 3px solid #ddd;
+    padding: 4px 8px;
+    border-radius: 3px;
+}
+
+/* The expired tab in the filter bar gets a red dot indicator */
+.sc-tab[data-status="EXPIRED"] {
+    position: relative;
+}
+.sc-tab[data-status="EXPIRED"].has-items::after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 8px;
+    height: 8px;
+    background: #c62828;
+    border-radius: 50%;
+    border: 2px solid #fff;
+}
+
+/* Expired row highlight in table */
+.sc-table tr.sc-row-expired td {
+    background: #fff8f8;
+}
+
+/* "Needs Attention" inline badge shown next to EXPIRED status badge */
+.sc-needs-attention {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #fbe9e7;
+    color: #bf360c;
+    border: 1px solid #ffccbc;
+    border-radius: 12px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 6px;
+    animation: sc-pulse 2s ease-in-out infinite;
+}
+
+@keyframes sc-pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.6; }
+}
+
+/* Expired stat card gets a pulsing ring when count > 0 */
+.sc-stat-card[data-filter-status="EXPIRED"].has-expired {
+    box-shadow: 0 0 0 3px rgba(198, 40, 40, 0.15), 0 2px 8px rgba(0,0,0,0.06);
+    border-color: #ef9a9a;
+}
+
+/* ── Banner shown above the table when expired notices exist ─────────────── */
+.sc-attention-banner {
+    display: none;  /* shown by JS when expired count > 0 */
+    background: #fbe9e7;
+    border: 1px solid #ef9a9a;
+    border-left: 5px solid #c62828;
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin-bottom: 14px;
+    font-size: 13px;
+    color: #7f0000;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+.sc-attention-banner:hover {
+    background: #ffebee;
+}
+.sc-attention-banner i { font-size: 16px; }
+.sc-attention-banner strong { font-size: 14px; }
+/* ── Banner dismiss button and clickable text (Phase 3 additions) ────────── */
+.sc-attention-banner {
+    justify-content: flex-start;  /* override so dismiss button sits at end */
+}
+
+.sc-banner-text {
+    flex: 1;
+    cursor: pointer;
+}
+
+.sc-banner-link {
+    text-decoration: underline;
+    margin-left: 8px;
+}
+
+.sc-banner-dismiss {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    font-size: 16px;
+    color: #7f0000;
+    cursor: pointer;
+    padding: 0 4px;
+    border-radius: 4px;
+    line-height: 1;
+    opacity: 0.6;
+    margin-left: auto;
+}
+.sc-banner-dismiss:hover { opacity: 1; background: rgba(0,0,0,0.06); }
+/* ═══════════════════════════════════════════════════════════════════════════
+   Close Notice Modal — 3-option redesign
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Wider modal for the 3 close options */
+.sc-modal-close-wide {
+    width: 660px;
+}
+
+/* Close type radio option cards */
+.sc-close-type-group {
+    border: none;
+    padding: 0;
+    margin: 0 0 18px 0;
+}
+
+.sc-close-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.sc-close-option {
+    cursor: pointer;
+    display: block;
+}
+
+.sc-close-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.sc-close-option-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 12px 16px;
+    border: 2px solid #e8e8e8;
+    border-radius: 8px;
+    background: #fafafa;
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.sc-close-option input[type="radio"]:checked + .sc-close-option-card {
+    border-color: #1a1a2e;
+    background: #f0f4ff;
+}
+
+.sc-close-option-card:hover {
+    border-color: #aaa;
+}
+
+.sc-close-option-card strong {
+    display: block;
+    font-size: 14px;
+    color: #1a1a2e;
+    margin-bottom: 3px;
+}
+
+.sc-close-option-card p {
+    margin: 0;
+    font-size: 12px;
+    color: #666;
+    line-height: 1.5;
+}
+
+/* Option icons */
+.sc-close-option-icon {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+.sc-icon-warning    { background: #fff3cd; color: #b8860b; }
+.sc-icon-penalty    { background: #fbe9e7; color: #c62828; }
+.sc-icon-suspension { background: #ede7f6; color: #512da8; }
+
+/* Highlight icon when option is selected */
+.sc-close-option input[type="radio"]:checked + .sc-close-option-card .sc-icon-warning    { background: #ffc107; color: #fff; }
+.sc-close-option input[type="radio"]:checked + .sc-close-option-card .sc-icon-penalty    { background: #c62828; color: #fff; }
+.sc-close-option input[type="radio"]:checked + .sc-close-option-card .sc-icon-suspension { background: #512da8; color: #fff; }
+
+/* Sub-panels for type-specific inputs */
+.sc-close-sub-panel {
+    margin-bottom: 16px;
+}
+
+.sc-sub-panel-inner {
+    background: #f8f9ff;
+    border: 1px solid #dde3f7;
+    border-radius: 8px;
+    padding: 14px 16px;
+}
+
+.sc-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    margin-top: 6px;
+    margin-bottom: 10px;
+    background: #fff;
+}
+
+.sc-input:focus {
+    outline: none;
+    border-color: #3949ab;
+    box-shadow: 0 0 0 3px rgba(57,73,171,0.12);
+}
+
+.sc-suspension-toggle {
+    margin: 6px 0 10px;
+}
+
+.sc-checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 13px;
+    color: #555;
+    cursor: pointer;
+    line-height: 1.5;
+}
+
+.sc-checkbox-label input[type="checkbox"] {
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.sc-form-hint {
+    font-size: 12px;
+    color: #888;
+    margin: -4px 0 6px;
+}
+
+.sc-notes-label {
+    margin-top: 6px;
+}
+
+.sc-required {
+    color: #c62828;
+    font-weight: bold;
+    margin-left: 2px;
+}
+/* ── Toast notification ───────────────────────────────────────────────────── */
+.sc-toast {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    z-index: 9999;
+    background: #1a1a2e;
+    color: #fff;
+    padding: 13px 20px;
+    border-radius: 9px;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.22);
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    pointer-events: none;
+    max-width: 420px;
+}
+.sc-toast.sc-toast-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+.sc-toast.sc-toast-success i { color: #66bb6a; }
+.sc-toast.sc-toast-error     { background: #c62828; }
+.sc-toast.sc-toast-error i   { color: #fff; }
