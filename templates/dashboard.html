@@ -1,0 +1,462 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}BSSS Claim Adjudication Monitoring System{% endblock %}
+
+{% block content %}
+    <div class="generated-on">
+        <h5>
+        Generated on: 
+        <span id="generatedOn">
+            <span class="gen-date"></span><span class="gen-separator">, </span><span class="gen-time"></span>
+        </span>
+        </h5>
+    </div>
+
+    <div id="date-filters" class="date-filters">
+        <div class="date-container">
+            <label>From:</label>
+            <select id="from-month"></select>
+            <select id="from-day"></select>
+            <select id="from-year"></select>
+        </div>
+        <div class="date-container">
+            <label>To:</label>
+            <select id="to-month"></select>
+            <select id="to-day"></select>
+            <select id="to-year"></select>
+        </div>
+        <button id="apply-date-filter" class="btn-run">Run</button>
+    </div>
+
+    <div class="dashboard-cards">
+        <!-- Column 1 -->
+        <div class="card-column main-column">
+            <!-- Flagged Claims Card -->
+            <div class="card flagged-claims" 
+            data-modal-title="Flagged Claims Details"
+            data-download-url="{% url 'download_flagged_claims' %}"
+            data-district="{{ district_param|urlencode }}">
+                <button title="download" id="download-flagged" 
+                class="download-btn">  
+                    <i class="fas fa-download"></i>
+                    <span class="btn-text"></span>
+                </button>
+                <!-- REPLACE the card-main div with: -->
+                <div class="card-main">
+                    <h2>Patient Admitted in Watchlist Hospitals
+                        <span class="card-tooltip-wrap">
+                            <i class="fas fa-info-circle card-tooltip-icon"></i>
+                            <span class="card-tooltip-content">Counts individual admissions at hospitals that have been placed on the
+                                BSSS surveillance watchlist due to prior irregularities.</span>
+                        </span>
+                    </h2>
+                    <div class="card-value-row">
+                        <span class="card-value">0</span>
+                        <span class="card-unit">admissions</span>
+                    </div>
+                    <div class="card-secondary">
+                        <span class="card-secondary-value" id="flagged-hospitals-count">0</span>
+                        <span class="card-secondary-label">hospitals on watchlist</span>
+                    </div>
+                </div>
+                <div class="card-hover-content">
+                    <div class="time-metric">
+                        <span class="time-label">Overall:</span>
+                        <span class="time-value">0</span>
+                    </div>
+                    <div class="time-metric">
+                        <span class="time-label">Yesterday:</span>
+                        <span class="time-value">0</span>
+                    </div>
+                    <div class="time-metric">
+                        <span class="time-label">Last 30 days:</span>
+                        <span class="time-value">0</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- High Value Claims Card -->
+            <div class="card high-value" 
+            data-download-url="{% url 'download_high_value_claims' %}"
+            data-district="{{ district_param|urlencode }}">
+                <button title="download" class="download-btn">
+                    <i class="fas fa-download"></i>
+                    <span class="btn-text"></span>
+                </button>
+                <div class="card-main">
+                    <h2>High Value Claims
+                        <span class="card-tooltip-wrap">
+                            <i class="fas fa-info-circle card-tooltip-icon"></i>
+                            <span class="card-tooltip-content">Claims exceeding PMJAY's high-value monetary threshold, broken down into Surgical (≥₹1,00,000) and Medical (≥₹25,000) categories.</span>
+                        </span>
+                    </h2>
+                    <div class="card-value-row">
+                        <span class="card-value">0</span>
+                        <span class="card-unit">claims</span>
+                    </div>
+                    <div class="card-secondary">
+                        <span class="card-secondary-value" id="hvc-hospitals-count">0</span>
+                        <span class="card-secondary-label">hospitals involved</span>
+                    </div>
+                </div>
+                <div class="card-hover-content split-view">
+                    <!-- Surgical Section -->
+                    <div class="category-box surgical">
+                        <div class="category-header surgical-header">
+                            <h4>Surgical</h4>
+                        </div>
+                        <div class="time-metric">
+                            <span class="time-label">Overall:</span>
+                            <span class="time-value">0</span>
+                        </div>
+                        <div class="time-metric">
+                            <span class="time-label">Yesterday:</span>
+                            <span class="time-value">0</span>
+                        </div>
+                        <div class="time-metric">
+                            <span class="time-label">Last 30 days:</span>
+                            <span class="time-value">0</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Divider Line -->
+                    <div class="vertical-divider"></div>
+                    
+                    <!-- Medical Section -->
+                    <div class="category-box medical">
+                        <div class="category-header medical-header">
+                            <h4>Medical</h4>
+                        </div>
+                        <div class="time-metric">
+                            <span class="time-label">Overall:</span>
+                            <span class="time-value">0</span>
+                        </div>
+                        <div class="time-metric">
+                            <span class="time-label">Yesterday:</span>
+                            <span class="time-value">0</span>
+                        </div>
+                        <div class="time-metric">
+                            <span class="time-label">Last 30 days:</span>
+                            <span class="time-value">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Hospital Bed Cases Card -->
+            <div class="card hospital-beds" 
+            data-details-url="{% url 'get_hospital_bed_details' %}"
+            data-download-url="{% url 'download_hospital_bed_cases_excel' %}"
+            data-district="{{ district_param|urlencode }}">
+                <button class="download-btn">
+                    <i class="fas fa-download"></i>
+                    <span class="btn-text"></span>
+                </button>
+                <div class="card-main">
+                    <h2>Hospital Bed Cases
+                        <span class="card-tooltip-wrap">
+                            <i class="fas fa-info-circle card-tooltip-icon"></i>
+                            <span class="card-tooltip-content">Admissions recorded at hospitals where the number of in-patients on a given day exceeded that hospital's declared bed strength.</span>
+                        </span>
+                    </h2>
+                    <div class="card-value-row">
+                        <span class="card-value">0</span>
+                        <span class="card-unit">admissions</span>
+                    </div>
+                    <div class="card-secondary">
+                        <span class="card-secondary-value" id="bed-hospitals-count">0</span>
+                        <span class="card-secondary-label">hospitals over capacity</span>
+                    </div>
+                </div>
+                <div class="card-hover-content">
+                    <div class="time-metric">
+                        <span class="time-label">Overall:</span>
+                        <span class="time-value">0</span>
+                    </div>
+                    <div class="time-metric">
+                        <span class="time-label">Yesterday:</span>
+                        <span class="time-value">0</span>
+                    </div>
+                    <div class="time-metric">
+                        <span class="time-label">Last 30 days:</span>
+                        <span class="time-value">0</span>
+                    </div>
+                    <div class="violations-container" style="display:none;"></div>
+                </div>
+            </div>
+            
+            <!-- Family ID Cases Card -->
+            <div class="card family-id" 
+            data-details-url="{% url 'get_family_id_cases_details' %}"
+            data-download-url="{% url 'download_family_id_cases_excel' %}"
+            data-district="{{ district_param|urlencode }}">
+                <button class="download-btn">
+                    <i class="fas fa-download"></i>
+                    <span class="btn-text"></span>
+                </button>
+                <div class="card-main">
+                    <h2>Family ID Cases
+                        <span class="card-tooltip-wrap">
+                            <i class="fas fa-info-circle card-tooltip-icon"></i>
+                            <span class="card-tooltip-content">Claims where a single Ayushman Bharat beneficiary family ID was used at multiple hospitals on the same or overlapping dates, or in patterns statistically inconsistent with genuine medical need.</span>
+                        </span>
+                    </h2>
+                    <div class="card-value-row">
+                        <span class="card-value">0</span>
+                        <span class="card-unit">claims</span>
+                    </div>
+                    <div class="card-secondary">
+                        <span class="card-secondary-value" id="family-id-count">0</span>
+                        <span class="card-secondary-label">unique family IDs flagged</span>
+                    </div>
+                </div>
+                <div class="card-hover-content">
+                    <div class="time-metric">
+                        <span class="time-label">Overall:</span>
+                        <span class="time-value">0</span>
+                    </div>
+                    <div class="time-metric">
+                        <span class="time-label">Yesterday:</span>
+                        <span class="time-value">0</span>
+                    </div>
+                    <div class="time-metric">
+                        <span class="time-label">Last 30 days:</span>
+                        <span class="time-value">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Column 2 -->
+        <div class="card-column secondary-column">
+            <!-- Geographic Anomalies Card -->
+            <div class="card geo-anomalies" 
+            data-details-url="{% url 'get_geo_anomalies_details' %}"
+            data-download-url="{% url 'geographic_anomalies_excel' %}"
+            data-district="{{ district_param|urlencode }}">
+                <button class="download-btn">
+                    <i class="fas fa-download"></i>
+                    <span class="btn-text"></span>
+                </button>
+                <div class="card-main">
+                    <h2>Geographic Anomalies
+                        <span class="card-tooltip-wrap">
+                            <i class="fas fa-info-circle card-tooltip-icon"></i>
+                            <span class="card-tooltip-content">Claim records where the patient's home state (as registered in the Ayushman Bharat database) and the state of the treating hospital are geographically inconsistent.</span>
+                        </span>
+                    </h2>
+                    <div class="card-value-row">
+                        <span class="card-value">0</span>
+                        <span class="card-unit">cases</span>
+                    </div>
+                </div>
+                <div class="card-hover-content">
+                    <div class="time-metric">
+                        <span class="time-label">Overall:</span>
+                        <span class="time-value">0</span>
+                    </div>
+                    <div class="time-metric">
+                        <span class="time-label">Yesterday:</span>
+                        <span class="time-value">0</span>
+                    </div>
+                    <div class="time-metric">
+                        <span class="time-label">Last 30 days:</span>
+                        <span class="time-value">0</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card ophthalmology" 
+            data-download-url="{% url 'download_ophthalmology_excel' %}"
+            data-district="{{ district_param|urlencode }}">
+                <button class="download-btn">
+                    <i class="fas fa-download"></i>
+                    <span class="btn-text"></span>
+                </button>
+                <div class="card-main">
+                    <h2>Ophthalmology (Cataract)
+                        <span class="card-tooltip-wrap">
+                            <i class="fas fa-info-circle card-tooltip-icon"></i>
+                            <span class="card-tooltip-content">Number of hospitals with statistically significant anomalies in cataract
+                                surgery claims, across three violation types: patient age under 40, exceeded OT cases limit per hospital per day, and pre-authorisation timing.</span>
+                        </span>
+                    </h2>
+                    <div class="card-value-row">
+                        <span class="card-value">0</span>
+                        <span class="card-unit">hospitals</span>
+                    </div>
+                    <div class="card-secondary">
+                        <span class="card-secondary-value" id="ophth-unique-cases">0</span>
+                        <span class="card-secondary-label">unique cases flagged</span>
+                    </div>
+                    
+                    <!-- Sub-cards Container -->
+                    <div class="sub-cards">
+                        <!-- Age < 40 Sub-card -->
+                        <div class="sub-card age">
+                            <div class="sub-card-header">
+                                <h3>Age &lt; 40
+                                    <span class="card-tooltip-wrap">
+                                        <i class="fas fa-info-circle card-tooltip-icon sub-icon"></i>
+                                        <span class="card-tooltip-content">Cataract surgeries claimed for patients under 40 years of age.</span>
+                                    </span>
+                                </h3>
+                                <div class="sub-card-value-group">
+                                    <div class="card-value">0</div>
+                                    <span class="card-unit sub-unit">cases</span>
+                                    <div class="sub-secondary"><span id="age-hospitals-count">0</span> hospitals</div>
+                                </div>
+                            </div>
+                            {% comment %} <div class="card-trend up">↑ 22%</div> {% endcomment %}
+                            <div class="sub-card-hover">
+                                <div class="time-metric">
+                                    <span class="time-label">Overall:</span>
+                                    <span class="time-value">0</span>
+                                </div>
+                                <div class="time-metric">
+                                    <span class="time-label">Yesterday:</span>
+                                    <span class="time-value">0</span>
+                                </div>
+                                <div class="time-metric">
+                                    <span class="time-label">Last 30 days:</span>
+                                    <span class="time-value">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- OT Cases Sub-card -->
+                        <div class="sub-card ot-cases">
+                            <div class="sub-card-header">
+                                <h3>OT Cases
+                                    <span class="card-tooltip-wrap">
+                                        <i class="fas fa-info-circle card-tooltip-icon sub-icon"></i>
+                                        <span class="card-tooltip-content">Excess OT cases beyond daily hospital capacity. Capacity = min(no. of surgeons, no. of OTs) x 30. A hospital billing more procedures than this limit on a given day is flagged, and the excess count is shown here.</span>
+                                    </span>
+                                </h3>
+                                <div class="sub-card-value-group">
+                                    <div class="card-value">0</div>
+                                    <span class="card-unit sub-unit">excess cases</span>
+                                    <div class="sub-secondary"><span id="ot-hospitals-count">0</span> hospitals</div>
+                                </div>
+                            </div>
+                            {% comment %} <div class="card-trend down">↓ 3%</div> {% endcomment %}
+                            <div class="sub-card-hover">
+                                <div class="time-metric">
+                                    <span class="time-label">Overall:</span>
+                                    <span class="time-value">0</span>
+                                </div>
+                                <div class="time-metric">
+                                    <span class="time-label">Yesterday:</span>
+                                    <span class="time-value">0</span>
+                                </div>
+                                <div class="time-metric">
+                                    <span class="time-label">Last 30 days:</span>
+                                    <span class="time-value">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Preauth Time Sub-card -->
+                        <div class="sub-card preauth">
+                            <div class="sub-card-header">
+                                <h3>Preauth Time
+                                    <span class="card-tooltip-wrap">
+                                        <i class="fas fa-info-circle card-tooltip-icon sub-icon"></i>
+                                        <span class="card-tooltip-content">Number of cataract claims where the pre-authorisation was initiated outside operating hours of 8:00 AM to 6:00 PM.</span>
+                                    </span>
+                                </h3>
+                                <div class="sub-card-value-group">
+                                    <div class="card-value">0</div>
+                                    <span class="card-unit sub-unit">cases</span>
+                                    <div class="sub-secondary"><span id="preauth-hospitals-count">0</span> hospitals</div>
+                                </div>
+                            </div>
+                            {% comment %} <div class="card-trend neutral">→ 0%</div> {% endcomment %}
+                            <div class="sub-card-hover">
+                                <div class="time-metric">
+                                    <span class="time-label">Overall Avg:</span>
+                                    <span class="time-value">0</span>
+                                </div>
+                                <div class="time-metric">
+                                    <span class="time-label">Yesterday:</span>
+                                    <span class="time-value">0</span>
+                                </div>
+                                <div class="time-metric">
+                                    <span class="time-label">Last 30 days:</span>
+                                    <span class="time-value">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Show Cause Actions -->
+                <div class="show-cause-actions" style="margin-top:15px; display:none;">
+                    <button id="btn-select-flagged-hospitals" class="btn-run">
+                        Select Flagged Hospitals
+                    </button>
+                    <button id="btn-send-show-cause" class="btn-run" disabled>
+                        Send Show Cause Notice
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- modal markup, if you want it only on this page -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-container" 
+        data-excel-url=""
+        data-pdf-url="{% url 'download_flagged_claims_report' %}"
+        data-details-url=""
+        data-district="{{ district_param|urlencode }}">
+            <!-- Loader -->
+            <div id="pdfLoader" class="pdf-loading-overlay">
+                <div class="pdf-loading-content">
+                <h3>Generating PDF Report</h3>
+                <div class="progress-container">
+                    <div id="pdfProgressBar" class="progress-bar"></div>
+                    <div id="pdfProgressText" class="progress-text">0%</div>
+                </div>
+                </div>
+            </div>
+
+            <!-- Fixed position buttons -->
+            <button class="modal-pdf-download" type="button">
+                <i class="fas fa-file-pdf"></i> Download PDF Report
+            </button>
+            <button class="modal-close">
+                <span class="close-icon">✕</span>
+            </button>
+            
+            <!-- Header (fixed when scrolling) -->
+            <div class="modal-header">
+                <h3 id="modalTitle"></h3>
+            </div>
+            
+            <!-- Scrollable content area -->
+            <div class="modal-content" id="modalContent">
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+  <!-- first include global PDF_URLS script if needed -->
+  <script>
+    window.PDF_URLS = {
+        flagged:   "{% url 'download_flagged_claims_report' %}",
+        highValue: "{% url 'download_high_value_claims_report' %}",
+        hospitalBeds:  "{% url 'download_hospital_bed_report' %}",
+        familyId:      "{% url 'download_family_id_cases_report' %}",
+        geoAnomalies:  "{% url 'download_geo_anomalies_pdf_report' %}",
+        ophthalmology: "{% url 'download_ophthalmology_pdf_report' %}"
+      };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+  <link rel="stylesheet" href="https://js.arcgis.com/4.25/esri/themes/light/main.css">
+  <script src="https://js.arcgis.com/4.25/"></script>
+  <script src="{% static 'js/dashboard.js' %}"></script>
+{% endblock %}

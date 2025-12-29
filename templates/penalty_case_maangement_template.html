@@ -1,0 +1,220 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Penalty Management{% endblock %}
+
+{% block head_extra %}
+  <link rel="stylesheet" href="{% static 'css/demo/penalty_case_management.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div class="pen-container">
+
+  {# ── Page header ─────────────────────────────────────────────────────── #}
+  <div class="pen-page-header">
+    <div class="pen-page-title">
+      <h2><i class="fas fa-gavel" aria-hidden="true"></i> Penalty Management</h2>
+      <p class="pen-page-subtitle">
+        Track financial penalties and suspension orders imposed following Show Cause Notice proceedings.
+      </p>
+    </div>
+    <button class="pen-export-btn" id="pen-export-btn">
+      <i class="fas fa-file-excel" aria-hidden="true"></i> Export Excel
+    </button>
+  </div>
+
+  {# ── Summary cards ───────────────────────────────────────────────────── #}
+  <div class="pen-summary-row" id="pen-summary-row">
+    <div class="pen-stat-card clickable" data-filter-status="ACTIVE">
+      <div class="pen-stat-icon pen-icon-active"><i class="fas fa-clock"></i></div>
+      <div class="pen-stat-body">
+        <div class="pen-stat-value" id="stat-active">—</div>
+        <div class="pen-stat-label">Active</div>
+      </div>
+    </div>
+    <div class="pen-stat-card clickable" data-filter-status="REMINDER_SENT">
+      <div class="pen-stat-icon pen-icon-reminder"><i class="fas fa-bell"></i></div>
+      <div class="pen-stat-body">
+        <div class="pen-stat-value" id="stat-reminder-sent">—</div>
+        <div class="pen-stat-label">Reminder Sent</div>
+      </div>
+    </div>
+    <div class="pen-stat-card clickable" data-filter-status="NON_COMPLIANT">
+      <div class="pen-stat-icon pen-icon-noncompliant"><i class="fas fa-times-circle"></i></div>
+      <div class="pen-stat-body">
+        <div class="pen-stat-value" id="stat-non-compliant">—</div>
+        <div class="pen-stat-label">Non-Compliant</div>
+      </div>
+    </div>
+    <div class="pen-stat-card clickable" data-filter-status="PAID">
+      <div class="pen-stat-icon pen-icon-paid"><i class="fas fa-check-circle"></i></div>
+      <div class="pen-stat-body">
+        <div class="pen-stat-value" id="stat-paid">—</div>
+        <div class="pen-stat-label">Paid</div>
+      </div>
+    </div>
+    <div class="pen-stat-card clickable" data-filter-status="CLOSED">
+      <div class="pen-stat-icon pen-icon-closed"><i class="fas fa-archive"></i></div>
+      <div class="pen-stat-body">
+        <div class="pen-stat-value" id="stat-closed">—</div>
+        <div class="pen-stat-label">Closed</div>
+      </div>
+    </div>
+  </div>
+
+  {# ── Filters ─────────────────────────────────────────────────────────── #}
+  <div class="pen-filter-bar">
+    <div class="pen-filter-tabs" id="pen-filter-tabs" role="tablist">
+      <button class="pen-tab active" role="tab" aria-selected="true"  data-status="">All Cases</button>
+      <button class="pen-tab" role="tab" aria-selected="false" data-status="ACTIVE">Active</button>
+      <button class="pen-tab" role="tab" aria-selected="false" data-status="REMINDER_SENT">Reminder Sent</button>
+      <button class="pen-tab" role="tab" aria-selected="false" data-status="NON_COMPLIANT">Non-Compliant</button>
+      <button class="pen-tab" role="tab" aria-selected="false" data-status="PAID">Paid</button>
+      <button class="pen-tab" role="tab" aria-selected="false" data-status="CLOSED">Closed</button>
+    </div>
+    <div class="pen-filter-right">
+      <select id="pen-type-filter" class="pen-select" aria-label="Filter by penalty type">
+        <option value="">All Types</option>
+        <option value="PENALTY">Penalty</option>
+        <option value="SUSPENSION">Suspension</option>
+      </select>
+      <div class="pen-search-wrap">
+        <i class="fas fa-search pen-search-icon" aria-hidden="true"></i>
+        <input
+          type="search"
+          id="pen-search-input"
+          class="pen-search-box"
+          placeholder="Search by hospital ID or name…"
+          autocomplete="off"
+          aria-label="Search penalty cases"
+        >
+      </div>
+    </div>
+  </div>
+
+  {# ── Table ───────────────────────────────────────────────────────────── #}
+  <div class="pen-table-wrapper" role="region" aria-label="Penalty Cases">
+    <table class="pen-table" id="pen-table" aria-live="polite">
+      <thead>
+        <tr>
+          <th>Hospital</th>
+          <th>District / State</th>
+          <th>Type</th>
+          <th>Penalty Amount</th>
+          <th>Suspension Period</th>
+          <th>Imposed On</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="pen-table-body">
+        <tr class="pen-loading-row">
+          <td colspan="8">
+            <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+            <span>Loading penalty cases…</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  {# ── Pagination ──────────────────────────────────────────────────────── #}
+  <nav class="pen-pagination" id="pen-pagination" aria-label="Penalty list pagination">
+    <div class="pen-page-info" id="pen-page-info" aria-live="polite"></div>
+    <div class="pen-page-controls" id="pen-page-controls"></div>
+  </nav>
+
+</div>
+
+{# ── Audit Log Modal ─────────────────────────────────────────────────────── #}
+<div class="sc-modal-backdrop" id="pen-audit-modal-backdrop"></div>
+<div class="sc-modal" id="pen-audit-modal" role="dialog" aria-modal="true" aria-labelledby="pen-audit-modal-title">
+  <div class="sc-modal-header">
+    <h3 id="pen-audit-modal-title">
+      <i class="fas fa-history" aria-hidden="true"></i> Audit Trail
+    </h3>
+    <span id="pen-audit-modal-subtitle" class="sc-modal-subtitle"></span>
+    <button class="sc-modal-close" data-close="pen-audit-modal" aria-label="Close audit trail modal">✕</button>
+  </div>
+  <div class="sc-modal-body" id="pen-audit-modal-body" aria-live="polite">
+    <p><i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Loading…</p>
+  </div>
+</div>
+
+{# ── Mark Paid Confirmation Modal ────────────────────────────────────────── #}
+<div class="sc-modal-backdrop" id="pen-paid-modal-backdrop"></div>
+<div class="sc-modal sc-modal-sm" id="pen-paid-modal" role="dialog" aria-modal="true" aria-labelledby="pen-paid-modal-title">
+  <div class="sc-modal-header">
+    <h3 id="pen-paid-modal-title">
+      <i class="fas fa-check-circle" aria-hidden="true"></i> Mark Penalty as Paid
+    </h3>
+    <button class="sc-modal-close" data-close="pen-paid-modal" aria-label="Close">✕</button>
+  </div>
+  <div class="sc-modal-body">
+    <p class="sc-modal-desc" id="pen-paid-modal-desc"></p>
+    <label class="sc-form-label" for="pen-paid-notes">
+      Payment Reference / Notes
+      <span class="sc-optional">(optional)</span>
+    </label>
+    <textarea id="pen-paid-notes" class="sc-textarea" rows="3"
+      placeholder="e.g. UTR No. 123456789, received on 15 Mar 2026."></textarea>
+  </div>
+  <div class="sc-modal-footer">
+    <button class="sc-btn sc-btn-cancel" data-close="pen-paid-modal">Cancel</button>
+    <button class="sc-btn sc-btn-confirm" id="pen-paid-confirm">
+      <i class="fas fa-check" aria-hidden="true"></i> Confirm Payment
+    </button>
+  </div>
+</div>
+
+{# ── Non-Compliant Confirmation Modal ────────────────────────────────────── #}
+<div class="sc-modal-backdrop" id="pen-nc-modal-backdrop"></div>
+<div class="sc-modal sc-modal-sm" id="pen-nc-modal" role="dialog" aria-modal="true" aria-labelledby="pen-nc-modal-title">
+  <div class="sc-modal-header">
+    <h3 id="pen-nc-modal-title">
+      <i class="fas fa-times-circle" aria-hidden="true"></i> Mark as Non-Compliant
+    </h3>
+    <button class="sc-modal-close" data-close="pen-nc-modal" aria-label="Close">✕</button>
+  </div>
+  <div class="sc-modal-body">
+    <p class="sc-modal-desc" id="pen-nc-modal-desc"></p>
+    <label class="sc-form-label" for="pen-nc-notes">
+      Officer Notes
+      <span class="sc-optional">(optional)</span>
+    </label>
+    <textarea id="pen-nc-notes" class="sc-textarea" rows="3"
+      placeholder="e.g. Hospital has not responded to repeated notices."></textarea>
+  </div>
+  <div class="sc-modal-footer">
+    <button class="sc-btn sc-btn-cancel" data-close="pen-nc-modal">Cancel</button>
+    <button class="sc-btn sc-btn-danger" id="pen-nc-confirm">
+      <i class="fas fa-exclamation-triangle" aria-hidden="true"></i> Confirm Non-Compliant
+    </button>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+  <script type="application/json" id="pen-server-config">
+    {
+      "urls": {
+        "cases":          "/penalty/api/cases/",
+        "summary":        "/penalty/api/summary/",
+        "export":         "/penalty/api/export/",
+        "auditLog":       "/penalty/api/{id}/audit-log/",
+        "reminder":       "/penalty/api/{id}/reminder/",
+        "markPaid":       "/penalty/api/{id}/mark-paid/",
+        "nonCompliant":   "/penalty/api/{id}/non-compliant/",
+        "close":          "/penalty/api/{id}/close/"
+      }
+    }
+  </script>
+  <script>
+    window.PEN_CONFIG = JSON.parse(
+      document.getElementById('pen-server-config').textContent
+    );
+  </script>
+  <script src="{% static 'js/penalty_case_management.js' %}"></script>
+{% endblock %}

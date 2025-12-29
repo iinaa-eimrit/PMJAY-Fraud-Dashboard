@@ -1,0 +1,293 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Show Cause Management{% endblock %}
+
+{% block head_extra %}
+  <link rel="stylesheet" href="{% static 'css/demo/show_cause_management.css' %}">
+{% endblock %}
+
+{% block content %}
+
+{# ── Dev mode timing bypass banner ──────────────────────────────────────── #}
+{% if bypass_timing_active %}
+<div class="sc-dev-banner" role="alert">
+  <i class="fas fa-flask" aria-hidden="true"></i>
+  <strong>Dev / Test Mode:</strong>
+  Timing windows (7-day, 14-day, 3-day) are bypassed.
+  Set <code>SHOW_CAUSE_BYPASS_TIMING = False</code> in settings to enforce real timings.
+</div>
+{% endif %}
+
+<div class="sc-mgmt-container">
+
+  {# ── Page header ─────────────────────────────────────────────────────── #}
+  <div class="sc-page-header">
+    <div class="sc-page-title">
+      <h2>Show Cause Management</h2>
+      <p class="sc-page-subtitle">
+        Show Cause Notice lifecycle is tracked from the date of issuance and is independent of the
+        analytics date range used to detect violations.
+      </p>
+    </div>
+  </div>
+
+  {# ── Summary cards ───────────────────────────────────────────────────── #}
+  <div class="sc-summary-row" id="sc-summary-row">
+    <div class="sc-stat-card" data-status="ISSUED">
+      <div class="sc-stat-icon sc-icon-issued"><i class="fas fa-paper-plane" aria-hidden="true"></i></div>
+      <div class="sc-stat-body">
+        <div class="sc-stat-value" id="stat-issued-today">—</div>
+        <div class="sc-stat-label">Issued Today</div>
+      </div>
+    </div>
+    <div class="sc-stat-card clickable" data-filter-status="ISSUED" role="button" tabindex="0" aria-label="Filter by Reminder 1 Pending">
+      <div class="sc-stat-icon sc-icon-r1"><i class="fas fa-bell" aria-hidden="true"></i></div>
+      <div class="sc-stat-body">
+        <div class="sc-stat-value" id="stat-r1-pending">—</div>
+        <div class="sc-stat-label">Reminder 1 Pending</div>
+      </div>
+    </div>
+    <div class="sc-stat-card clickable" data-filter-status="REMINDER_1_SENT" role="button" tabindex="0" aria-label="Filter by Reminder 2 Pending">
+      <div class="sc-stat-icon sc-icon-r2"><i class="fas fa-bell" aria-hidden="true"></i></div>
+      <div class="sc-stat-body">
+        <div class="sc-stat-value" id="stat-r2-pending">—</div>
+        <div class="sc-stat-label">Reminder 2 Pending</div>
+      </div>
+    </div>
+    <div class="sc-stat-card clickable" data-filter-status="REMINDER_2_SENT" role="button" tabindex="0" aria-label="Filter by Overdue notices">
+      <div class="sc-stat-icon sc-icon-overdue"><i class="fas fa-exclamation-circle" aria-hidden="true"></i></div>
+      <div class="sc-stat-body">
+        <div class="sc-stat-value" id="stat-overdue">—</div>
+        <div class="sc-stat-label">Overdue</div>
+      </div>
+    </div>
+    <div class="sc-stat-card clickable" data-filter-status="EXPIRED" role="button" tabindex="0" aria-label="Filter by Expired notices">
+      <div class="sc-stat-icon sc-icon-expired"><i class="fas fa-times-circle" aria-hidden="true"></i></div>
+      <div class="sc-stat-body">
+        <div class="sc-stat-value" id="stat-expired">—</div>
+        <div class="sc-stat-label">Expired</div>
+      </div>
+    </div>
+    <div class="sc-stat-card clickable" data-filter-status="CLOSED" role="button" tabindex="0" aria-label="Filter by Closed notices">
+      <div class="sc-stat-icon sc-icon-closed"><i class="fas fa-check-circle" aria-hidden="true"></i></div>
+      <div class="sc-stat-body">
+        <div class="sc-stat-value" id="stat-closed">—</div>
+        <div class="sc-stat-label">Closed</div>
+      </div>
+    </div>
+  </div>
+
+  {# ── Filters ─────────────────────────────────────────────────────────── #}
+  <div class="sc-filter-bar">
+    <div class="sc-filter-tabs" id="sc-filter-tabs" role="tablist" aria-label="Filter notices by status">
+      <button class="sc-tab active" data-status="" role="tab" aria-selected="true">All Notices</button>
+      <button class="sc-tab" data-status="ISSUED" role="tab" aria-selected="false">Issued</button>
+      <button class="sc-tab" data-status="REMINDER_1_SENT" role="tab" aria-selected="false">Send 1st Reminder</button>
+      <button class="sc-tab" data-status="REMINDER_2_SENT" role="tab" aria-selected="false">Send 2nd Reminder</button>
+      <button class="sc-tab" data-status="EXPIRED" role="tab" aria-selected="false">Expired</button>
+      <button class="sc-tab" data-status="CLOSED" role="tab" aria-selected="false">Closed</button>
+    </div>
+    <div class="sc-filter-search">
+      <label for="sc-search-input" class="visually-hidden">Search notices</label>
+      <i class="fas fa-search sc-search-icon" aria-hidden="true"></i>
+      <input
+        type="search"
+        id="sc-search-input"
+        class="sc-search-box"
+        placeholder="Search by hospital ID or name…"
+        autocomplete="off"
+        aria-label="Search by hospital ID or name"
+      >
+    </div>
+  </div>
+
+  {# ── Table ───────────────────────────────────────────────────────────── #}
+  <div class="sc-table-wrapper" role="region" aria-label="Show Cause Notices">
+    <table class="sc-table" id="sc-notices-table" aria-live="polite">
+      <thead>
+        <tr>
+          <th scope="col">Hospital</th>
+          <th scope="col">District</th>
+          <th scope="col">Analytics Period</th>
+          <th scope="col">Issued On</th>
+          <th scope="col">Status</th>
+          <th scope="col">Reminder 1</th>
+          <th scope="col">Reminder 2</th>
+          <th scope="col">Next Deadline</th>
+          <th scope="col">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="sc-table-body">
+        <tr class="sc-loading-row">
+          <td colspan="9">
+            <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+            <span>Loading notices…</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  {# ── Pagination ──────────────────────────────────────────────────────── #}
+  <nav class="sc-pagination" id="sc-pagination" aria-label="Notice list pagination">
+    <div class="sc-page-info" id="sc-page-info" aria-live="polite"></div>
+    <div class="sc-page-controls" id="sc-page-controls"></div>
+  </nav>
+
+</div>
+
+{# ── Audit Log Modal ─────────────────────────────────────────────────────── #}
+<div class="sc-modal-backdrop" id="audit-modal-backdrop"></div>
+<div class="sc-modal" id="audit-modal" role="dialog" aria-modal="true" aria-labelledby="audit-modal-title">
+  <div class="sc-modal-header">
+    <h3 id="audit-modal-title">
+      <i class="fas fa-history" aria-hidden="true"></i> Audit Trail
+    </h3>
+    <span id="audit-modal-subtitle" class="sc-modal-subtitle"></span>
+    <button class="sc-modal-close" data-close="audit-modal" aria-label="Close audit trail modal">✕</button>
+  </div>
+  <div class="sc-modal-body" id="audit-modal-body" aria-live="polite">
+    <p><i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Loading…</p>
+  </div>
+</div>
+
+{# ── Close Notice Modal ──────────────────────────────────────────────────── #}
+<div class="sc-modal-backdrop" id="close-modal-backdrop"></div>
+<div class="sc-modal sc-modal-close-wide" id="close-modal" role="dialog" aria-modal="true" aria-labelledby="close-modal-title">
+  <div class="sc-modal-header">
+    <h3 id="close-modal-title">
+      <i class="fas fa-check-circle" aria-hidden="true"></i> Close Notice
+    </h3>
+    <button class="sc-modal-close" data-close="close-modal" aria-label="Close this dialog">✕</button>
+  </div>
+  <div class="sc-modal-body">
+    <p class="sc-modal-desc" id="close-modal-desc"></p>
+
+    {# ── Step 1: Close type selector ────────────────────────────────────── #}
+    <fieldset class="sc-close-type-group" id="close-type-group">
+      <legend class="sc-form-label">Select Closure Type <span class="sc-required">*</span></legend>
+      <div class="sc-close-options">
+
+        <label class="sc-close-option" for="close-type-warning">
+          <input type="radio" name="close_type" id="close-type-warning" value="WARNING" checked>
+          <div class="sc-close-option-card">
+            <span class="sc-close-option-icon sc-icon-warning"><i class="fas fa-exclamation-triangle"></i></span>
+            <div>
+              <strong>Close with Warning</strong>
+              <p>Sends a formal warning email. No penalty imposed. Hospital is monitored going forward.</p>
+            </div>
+          </div>
+        </label>
+
+        <label class="sc-close-option" for="close-type-penalty">
+          <input type="radio" name="close_type" id="close-type-penalty" value="PENALTY">
+          <div class="sc-close-option-card">
+            <span class="sc-close-option-icon sc-icon-penalty"><i class="fas fa-rupee-sign"></i></span>
+            <div>
+              <strong>Close with Penalty</strong>
+              <p>Imposes a financial penalty. A penalty record will be created for tracking.</p>
+            </div>
+          </div>
+        </label>
+
+        <label class="sc-close-option" for="close-type-suspension">
+          <input type="radio" name="close_type" id="close-type-suspension" value="SUSPENSION">
+          <div class="sc-close-option-card">
+            <span class="sc-close-option-icon sc-icon-suspension"><i class="fas fa-ban"></i></span>
+            <div>
+              <strong>Close with Suspension</strong>
+              <p>Suspends the hospital's PMJAY empanelment. A penalty record will be created.</p>
+            </div>
+          </div>
+        </label>
+
+      </div>
+    </fieldset>
+
+    {# ── Step 2: Penalty-specific inputs (shown when PENALTY is selected) ─ #}
+    <div class="sc-close-sub-panel" id="panel-penalty" hidden>
+      <div class="sc-sub-panel-inner">
+        <label class="sc-form-label" for="penalty-amount">
+          Penalty Amount (INR) <span class="sc-required">*</span>
+        </label>
+        <input
+          type="number"
+          id="penalty-amount"
+          class="sc-input"
+          placeholder="e.g. 50000"
+          min="1"
+          step="1"
+        >
+        <div class="sc-suspension-toggle">
+          <label class="sc-checkbox-label">
+            <input type="checkbox" id="penalty-custom-suspension">
+            Assign a fixed suspension period (leave unchecked to suspend until penalty is paid)
+          </label>
+        </div>
+        <div id="penalty-suspension-date-wrap" hidden>
+          <label class="sc-form-label" for="penalty-suspension-until">
+            Suspension End Date <span class="sc-required">*</span>
+          </label>
+          <input type="date" id="penalty-suspension-until" class="sc-input">
+        </div>
+      </div>
+    </div>
+
+    {# ── Step 3: Suspension-specific inputs (shown when SUSPENSION is selected) #}
+    <div class="sc-close-sub-panel" id="panel-suspension" hidden>
+      <div class="sc-sub-panel-inner">
+        <label class="sc-form-label" for="suspension-until">
+          Suspension End Date <span class="sc-required">*</span>
+        </label>
+        <input type="date" id="suspension-until" class="sc-input">
+        <p class="sc-form-hint">The hospital's PMJAY empanelment will be suspended until this date.</p>
+      </div>
+    </div>
+
+    {# ── Notes (always visible) ─────────────────────────────────────────── #}
+    <label class="sc-form-label sc-notes-label" for="close-notes">
+      Officer Notes
+      <span class="sc-optional">(optional)</span>
+    </label>
+    <textarea
+      id="close-notes"
+      class="sc-textarea"
+      rows="3"
+      placeholder="e.g. Hospital submitted supporting documents."
+    ></textarea>
+  </div>
+  <div class="sc-modal-footer">
+    <button class="sc-btn sc-btn-cancel" data-close="close-modal">Cancel</button>
+    <button class="sc-btn sc-btn-confirm" id="close-modal-confirm">
+      <i class="fas fa-check" aria-hidden="true"></i> Confirm Close
+    </button>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+  
+  <script type="application/json" id="sc-server-config">
+    {
+      "bypass_timing": {% if bypass_timing_active %}true{% else %}false{% endif %},
+      "urls": {
+        "notices":  "/api/show-cause/notices/",
+        "summary":  "/api/show-cause/summary/",
+        "reminder1": "/api/show-cause/{id}/reminder-1/",
+        "reminder2": "/api/show-cause/{id}/reminder-2/",
+        "expire":   "/api/show-cause/{id}/expire/",
+        "close":    "/api/show-cause/{id}/close/",
+        "auditLog": "/api/show-cause/{id}/audit-log/"
+      }
+    }
+  </script>
+  <script>
+    // Read config from JSON script block — no Django template tags in JS context.
+    window.SC_CONFIG = JSON.parse(
+      document.getElementById('sc-server-config').textContent
+    );
+  </script>
+  <script src="{% static 'js/show_cause_management.js' %}"></script>
+{% endblock %}

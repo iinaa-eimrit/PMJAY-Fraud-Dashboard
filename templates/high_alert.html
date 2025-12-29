@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}High Alerts – PMJAY Fraud Detection{% endblock %}
+
+{% block content %}
+    <div class="generated-on">
+        <h5>
+        Generated on: 
+        <span id="generatedOn">
+            <span class="gen-date"></span><span class="gen-separator">, </span><span class="gen-time"></span>
+        </span>
+        </h5>
+    </div>
+
+    <div id="date-filters" class="date-filters">
+        <div class="date-container">
+            <label>From:</label>
+            <select id="from-month"></select>
+            <select id="from-day"></select>
+            <select id="from-year"></select>
+        </div>
+        <div class="date-container">
+            <label>To:</label>
+            <select id="to-month"></select>
+            <select id="to-day"></select>
+            <select id="to-year"></select>
+        </div>
+        <button id="apply-date-filter" class="btn-run">Run</button>
+        <div id="run-progress-container">
+            <div id="run-progress-text">Processing...</div>
+            <div id="run-progress" class="progress-container">
+                <div id="run-progress-bar" class="progress-bar"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="buttons">
+        <div class="high-alerts-total">
+            <p id="high-alerts-total-count">Total Cases: </p>
+            <p id="high-alerts-total-value">0</p>
+        </div>
+        <div class="export-buttons">
+            <button class="export-btn-excel" id="exportExcel">
+                <i class="fas fa-file-excel"></i> Export Excel
+            </button>
+            <button class="export-btn-pdf" id="exportPdf">
+                <i class="fas fa-file-pdf"></i> Export PDF
+            </button>
+        </div>
+    </div>
+    <!-- High Alert Table -->
+    <div class="table-container">
+        <table id="highAlertTable" class="styled-table">
+            <thead>
+                <tr>
+                    <th>Serial No</th>
+                    <th>Claim ID</th>
+                    <th>Patient Name</th>
+                    <th>Hospital ID</th>
+                    <th>Hospital Name</th>
+                    <th>District</th>
+                    <th>Preauth Initiated Date</th>
+                    <th>Preauth Initiated Time</th>
+                    <th>Patient Admitted in Watchlist Hospitals</th>
+                    <th>High Value Claims</th>
+                    <th>Hospital Bed Violation</th>
+                    <th>Family ID Violation</th>
+                    <th>Geo Anomaly</th>
+                    <th>Ophthalmology</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <div class="pagination-controls"></div>
+    </div>
+    <div class="chart-container">
+        <h4>District-wise High Alert Distribution</h4>
+        <canvas id="districtChart"></canvas>
+    </div>
+    <div class="demographics-container">
+        <div class="demographics-chart">
+            <div class="chart-card">
+                <h5>Age Distribution</h5>
+                <canvas id="ageChart"></canvas>
+            </div>
+        </div>
+        <div class="demographics-chart">
+            <div class="chart-card">
+                <h5>Gender Distribution</h5>
+                <canvas id="genderChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="high-alert-map-container">
+        <h4>District-wise High Alert Heat Map</h4>
+        <div id="highAlertMap" style="height: 600px; width: 100%; border: 1px solid #ddd;"></div>
+    </div>
+    <div id="pdfLoader" class="loader-modal">
+        <div class="loader-content">
+            <div class="loader-spinner"></div>
+            <div class="progress-container">
+                <div id="pdfProgressBar" class="progress-bar"></div>
+                <span id="pdfProgressText" class="progress-text">0%</span>
+            </div>
+            <p>Generating PDF report...</p>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/demo/high_alert.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        window.HIGH_ALERT_URLS = {
+            districts: "{% url 'high_alert_districts' %}",
+            demographics: "{% url 'high_alert_demographics' 'type' %}",
+            excel: "{% url 'download_high_alerts_excel' %}",
+            pdf: "{% url 'download_high_alert_report' %}"
+        };
+    </script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+    <script src="https://js.arcgis.com/4.29/"></script>
+    <script src="{% static 'js/high_alert.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,212 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}BSSS Claim Adjudication Monitoring System{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/demo/styles.css' %}">
+  <link rel="stylesheet" href="{% static 'css/demo/high_alert.css' %}">
+  <link rel="stylesheet" href="{% static 'css/demo/import.css' %}">
+  <link rel="stylesheet" href="{% static 'css/demo/data_management.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <script src="{% static 'js/lib/chart.min.js' %}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* Visually hidden but accessible to screen readers */
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+  </style>
+  {% block head_extra %}{% endblock %}
+</head>
+<body>
+  {% csrf_token %}
+  <div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-bg-image"></div>
+      <div class="sidebar-inner">
+        <div class="sidebar-header">
+          <!--
+            Inline style on img: Edge Tools warns about this but the logo width
+            is layout-critical and does not conflict with any CSS class.
+            Moving it to CSS is low-priority; suppress with: /* stylelint-disable */
+          -->
+          <img src="{% static 'images/pmjaylogo.png' %}" alt="PMJAY Logo" width="90">
+        </div>
+        <ul class="sidebar-menu">
+          <li class="{% if active_page == 'dashboard' %}active{% endif %}">
+            <a href="{% url 'dashboard' %}">
+              <i class="fas fa-tachometer-alt" aria-hidden="true"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li class="{% if active_page == 'high_alert' %}active{% endif %}">
+            <a href="{% url 'high_alerts' %}">
+              <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+              <span>High Alerts</span>
+            </a>
+          </li>
+          <li class="{% if active_page == 'data_management' %}active{% endif %}">
+            <a href="{% url 'data_management' %}">
+              <i class="fas fa-database" aria-hidden="true"></i>
+              <span>Data Management</span>
+            </a>
+          </li>
+          <li class="{% if active_page == 'show_cause' %}active{% endif %}">
+            <a href="/api/show-cause/management/">
+              <i class="fas fa-gavel" aria-hidden="true"></i>
+              <span>Show Cause</span>
+            </a>
+          </li>
+          <li class="nav-link {% if active_page == 'penalty' %}active{% endif %}">
+            <a href="/penalty/management/">
+              <i class="fas fa-gavel" aria-hidden="true"></i>
+              <span>Penalty Management</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div class="sidebar-footer">
+        <a href="{% url 'logout' %}" class="logout-btn">
+          <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+          <span>Log Out</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Main content wrapper -->
+    <div class="main-content" id="main-content">
+      <header class="header">
+        <div class="header-left">
+          <!--
+            FIX: toggle button now has aria-label so screen readers can identify it.
+            Was: <button class="toggle-btn" id="toggle-btn">
+            Error: "Buttons must have discernible text: Element has no title attribute"
+          -->
+          <button class="toggle-btn" id="toggle-btn" aria-label="Toggle sidebar navigation">
+            <i class="fas fa-bars" aria-hidden="true"></i>
+          </button>
+          <div class="header-title">
+            <h1>SAFU Dashboard (BSSS Claim Adjudication Monitoring System)</h1>
+          </div>
+        </div>
+        <div class="header-right">
+          <button id="import-btn" class="btn-glow" aria-label="Import data from file">
+            <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i> Import Data
+          </button>
+          <div class="district-filter">
+            <div class="dropdown-container">
+              <div class="dropdown-trigger">
+                <span class="selected-value">All Districts</span>
+                <i class="fas fa-chevron-down dropdown-icon" aria-hidden="true"></i>
+              </div>
+
+              <!--
+                FIX: select now has aria-label so screen readers can identify it.
+                Was: <select id="districtDropdown" class="hidden-select" multiple>
+                Error: "Select element must have an accessible name"
+              -->
+              <label for="districtDropdown" class="visually-hidden">Select districts</label>
+              <select id="districtDropdown" class="hidden-select" multiple aria-label="Select districts">
+                <option value="">All Districts</option>
+              </select>
+
+              <div class="dropdown-content" role="listbox" aria-label="District options" aria-multiselectable="true">
+                <div class="search-box">
+                  <label for="districtSearchInput" class="visually-hidden">Search districts</label>
+                  <input type="search" id="districtSearchInput" placeholder="Search districts..." class="search-input" aria-label="Search districts">
+                  <i class="fas fa-search search-icon" aria-hidden="true"></i>
+                </div>
+                <div class="dropdown-options">
+                  <div class="option-item all-districts">
+                    <input type="checkbox" id="selectAll" class="district-checkbox">
+                    <label for="selectAll">All Districts</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="content">
+        {% block content %}
+        {% endblock %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Modals -->
+  <div id="importModal" class="modal fade-in" role="dialog" aria-modal="true" aria-labelledby="importModalTitle">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title" id="importModalTitle">
+            <i class="fas fa-file-import" aria-hidden="true"></i> Upload Patient Reports
+          </h3>
+          <button class="close-btn" aria-label="Close import dialog">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="upload-container">
+            <input type="file" id="fileInput" multiple accept=".xlsx,.xls" hidden aria-label="Choose files to upload">
+            <div class="drop-zone" id="dropZone" role="button" tabindex="0" aria-label="Drop zone: drag and drop files here or click Browse Files">
+              <i class="fas fa-cloud-upload-alt fa-3x" aria-hidden="true"></i>
+              <p>Drag &amp; Drop files here<br>or</p>
+              <button class="browse-btn">Browse Files</button>
+            </div>
+            <div id="fileList" class="file-list" aria-live="polite"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-process" id="processBtn" disabled aria-label="Process uploaded files">
+            <i class="fas fa-cogs" aria-hidden="true"></i> Process Files
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="progressModal" class="modal fade-in" role="dialog" aria-modal="true" aria-labelledby="progressModalTitle" aria-live="polite">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-body text-center">
+          <div class="loader">
+            <i class="fas fa-sync fa-2x" aria-hidden="true"></i>
+          </div>
+          <h4 id="progressModalTitle">Processing Files</h4>
+          <div class="progress-container" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-label="Upload progress">
+            <div class="progress-bar">
+              <div class="progress-fill"></div>
+            </div>
+            <div class="progress-text">0%</div>
+          </div>
+          <p class="status-text" aria-live="polite">Initializing...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Common libraries -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+  <script src="{% static 'js/import.js' %}" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+  {% block extra_js %}
+  {% endblock %}
+</body>
+</html>
