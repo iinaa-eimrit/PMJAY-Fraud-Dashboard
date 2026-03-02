@@ -1,0 +1,7 @@
+Watching for file changes with StatReloader
+
+(process:22156): GLib-GIO-WARNING **: 20:03:38.210: Unexpectedly, UWP app `Microsoft.OutlookForWindows_1.2025.1020.100_x64__8wekyb3d8bbwe' (AUMId `Microsoft.OutlookForWindows_8wekyb3d8bbwe!Microsoft.OutlookforWindows') supports 4 extensions but has no verbs
+
+(process:22156): GLib-GIO-WARNING **: 20:03:38.316: Unexpectedly, UWP app `Dell.SupportAssistforPCs_4.10.6.0_x64__18ctm2993j0dg' (AUMId `Dell.SupportAssistforPCs_18ctm2993j0dg!App') supports 1 extensions but has no verbs
+
+(process:22156): GLib-GIO-WARNING **: 20:03:38.362: Unexpectedly, UWP app `Microsoft.ScreenSketch_11.2510.31.0_x64__8wekyb3d8bbwe' (AUMId `Microsoft.ScreenSketch_8wekyb3d8bbwe!App') supports 29 extensions but has no verbs
